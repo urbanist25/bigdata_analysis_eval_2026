@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>발표 동료평가 — 도시환경빅데이터분석</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E2E0D8;
+    --border-strong: #C8C5BB;
+    --text-primary: #1A1917;
+    --text-secondary: #6B6860;
+    --text-muted: #9C9A94;
+    --accent: #2B5FA6;
+    --accent-light: #EAF0FB;
+    --accent-mid: #B5CFF4;
+    --success: #1D9E75;
+    --success-light: #E1F5EE;
+    --warn: #BA7517;
+    --warn-light: #FAEEDA;
+    --danger: #A32D2D;
+    --danger-light: #FCEBEB;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .page { max-width: 560px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 28px; }
+  .header .eyebrow { font-size: 12px; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+  .header p { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6; }
+
+  /* Card */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+
+  /* Input */
+  .input-group { margin-bottom: 0; }
+  .input-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+  .input-group input {
+    width: 100%; padding: 10px 14px; font-size: 15px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--bg); color: var(--text-primary);
+    outline: none; transition: border-color 0.15s;
+  }
+  .input-group input:focus { border-color: var(--accent); background: #fff; }
+
+  /* Team selector */
+  .team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .team-btn {
+    padding: 10px 4px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--bg); color: var(--text-secondary);
+    cursor: pointer; text-align: center; transition: all 0.12s;
+  }
+  .team-btn:hover { border-color: var(--accent-mid); color: var(--accent); background: var(--accent-light); }
+  .team-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .section-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 10px; }
+
+  /* Criteria */
+  .criterion { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .criterion:last-child { border-bottom: none; padding-bottom: 0; }
+  .criterion:first-child { padding-top: 0; }
+  .crit-text { font-size: 14px; color: var(--text-primary); line-height: 1.6; margin-bottom: 12px; }
+  .crit-num-badge { display: inline-block; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-light); border-radius: 4px; padding: 2px 7px; margin-right: 6px; vertical-align: 1px; }
+
+  /* Star rating */
+  .star-row { display: flex; gap: 6px; align-items: center; }
+  .star-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--bg); color: var(--text-muted);
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .star-btn:hover { border-color: var(--accent-mid); color: var(--accent); background: var(--accent-light); }
+  .star-btn.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .star-label { font-size: 12px; color: var(--text-muted); margin-left: 8px; }
+
+  /* Score summary */
+  .score-summary { display: flex; align-items: center; justify-content: space-between; background: var(--accent-light); border-radius: var(--radius-sm); padding: 12px 16px; margin-top: 4px; }
+  .score-label { font-size: 13px; color: var(--accent); }
+  .score-val { font-size: 22px; font-weight: 600; color: var(--accent); }
+  .score-max { font-size: 13px; color: var(--accent); opacity: 0.7; }
+
+  /* Submit button */
+  .submit-btn {
+    width: 100%; padding: 14px; font-size: 16px; font-weight: 600;
+    background: var(--accent); color: #fff; border: none;
+    border-radius: var(--radius); cursor: pointer; transition: opacity 0.15s;
+    margin-top: 4px;
+  }
+  .submit-btn:hover { opacity: 0.88; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text-primary); color: #fff; font-size: 14px;
+    padding: 12px 22px; border-radius: 100px; white-space: nowrap;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Success screen */
+  .success-screen { text-align: center; padding: 40px 20px; display: none; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-screen h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .another-btn {
+    margin-top: 24px; padding: 12px 28px; font-size: 14px; font-weight: 500;
+    background: var(--bg); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm); cursor: pointer; color: var(--text-primary);
+  }
+
+  /* Admin */
+  .admin-page { display: none; max-width: 800px; margin: 0 auto; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .admin-header h1 { font-size: 20px; font-weight: 600; }
+  .admin-meta { font-size: 13px; color: var(--text-secondary); }
+  .back-btn {
+    font-size: 13px; padding: 8px 16px; border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; color: var(--text-secondary);
+  }
+
+  /* Admin table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--bg); font-weight: 600; color: var(--text-secondary); padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+  tr:last-child td { border-bottom: none; }
+  .rank-1 { background: #FFF9E6; }
+  .score-cell { font-weight: 600; }
+  .avg-row td { background: var(--accent-light); font-weight: 600; color: var(--accent); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .stat-card .s-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-card .s-val { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+
+  .team-detail { margin-top: 24px; }
+  .team-detail-header { font-size: 15px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary); }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-row select, .filter-row button {
+    padding: 8px 12px; font-size: 13px; border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm); background: var(--surface); color: var(--text-primary); cursor: pointer;
+  }
+  .export-btn { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 500; }
+
+  /* Login */
+  .login-page { max-width: 360px; margin: 60px auto 0; }
+  .login-page h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+  .login-page input { width: 100%; padding: 12px 14px; font-size: 15px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); margin-bottom: 12px; outline: none; }
+  .login-page input:focus { border-color: var(--accent); }
+  .login-page button { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; }
+  .login-error { font-size: 13px; color: var(--danger); text-align: center; margin-top: 8px; display: none; }
+
+  .tab-row { display: flex; gap: 4px; margin-bottom: 20px; }
+  .tab-btn { padding: 8px 16px; font-size: 13px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-secondary); cursor: pointer; }
+  .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .crit-breakdown { margin-top: 20px; }
+  .crit-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .crit-row-label { font-size: 12px; color: var(--text-secondary); flex: 0 0 220px; line-height: 1.4; }
+  .crit-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .crit-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s; }
+  .crit-avg { font-size: 12px; font-weight: 600; color: var(--accent); flex: 0 0 30px; text-align: right; }
+
+  @media (max-width: 480px) {
+    .team-grid { grid-template-columns: repeat(3, 1fr); }
+    .crit-row { flex-wrap: wrap; }
+    .crit-row-label { flex: 0 0 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STUDENT FORM -->
+<div class="page" id="studentPage">
+  <div class="header">
+    <div class="eyebrow">도시환경빅데이터분석 2026</div>
+    <h1>발표 동료평가</h1>
+    <p>각 조의 발표를 5점 척도로 평가해주세요.<br>본인 조는 평가하지 않아도 됩니다.</p>
+  </div>
+
+  <!-- Evaluator info -->
+  <div class="card">
+    <div class="input-group">
+      <label>이름 또는 학번</label>
+      <input type="text" id="evaluatorName" placeholder="예: 홍길동 / 20241234" />
+    </div>
+  </div>
+
+  <!-- Team selector -->
+  <div class="card">
+    <div class="section-label">평가할 조를 선택하세요</div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+
+  <!-- Criteria -->
+  <div class="card" id="criteriaCard">
+    <div id="criteriaList"></div>
+    <div class="score-summary" style="margin-top:16px">
+      <span class="score-label">총점</span>
+      <div><span class="score-val" id="totalScore">0</span><span class="score-max"> / 25</span></div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="submitEval()" disabled>평가 제출</button>
+</div>
+
+<!-- SUCCESS -->
+<div class="page" id="successPage" style="display:none">
+  <div class="success-screen" style="display:block">
+    <div class="success-icon">✅</div>
+    <h2>평가가 제출되었습니다</h2>
+    <p id="successMsg">감사합니다.</p>
+    <button class="another-btn" onclick="resetForNext()">다른 조 평가하기</button>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="loginPage" style="display:none">
+  <div class="login-page">
+    <h2>관리자 로그인</h2>
+    <input type="password" id="adminPw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')adminLogin()" />
+    <button onclick="adminLogin()">로그인</button>
+    <div class="login-error" id="loginError">비밀번호가 올바르지 않습니다.</div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminPage" class="admin-page">
+  <div class="admin-header">
+    <div>
+      <h1>관리자 대시보드</h1>
+      <div class="admin-meta" id="adminMeta"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="back-btn" onclick="exportCSV()">CSV 내보내기</button>
+      <button class="back-btn" onclick="showPage('student')">← 평가 페이지</button>
+    </div>
+  </div>
+
+  <div class="stat-grid" id="statGrid"></div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchTab('ranking',this)">조별 순위</button>
+    <button class="tab-btn" onclick="switchTab('breakdown',this)">항목별 분석</button>
+    <button class="tab-btn" onclick="switchTab('responses',this)">개별 응답</button>
+  </div>
+
+  <div id="tab-ranking"></div>
+  <div id="tab-breakdown" style="display:none"></div>
+  <div id="tab-responses" style="display:none"></div>
+</div>
+
+<!-- Admin access button (hidden corner) -->
+<div style="position:fixed;bottom:12px;right:12px">
+  <button onclick="showPage('login')" style="font-size:11px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#999;cursor:pointer;opacity:0.6">관리자</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CRITERIA = [
+  "골목상권 매출 예측의 필요성과 분석 대상 상권의 특성이 청중이 이해하기 쉽게 설명되었는가?",
+  "데이터 전처리부터 모델링, 예측 결과까지의 과정이 논리적 흐름에 따라 명확하게 전달되었는가?",
+  "상권 매출에 영향을 미치는 주요 변수들을 시각 자료를 활용하여 청중이 납득할 수 있도록 설명하였는가?",
+  "선정 상권의 답사 사진과 현장 관찰 내용이 데이터 분석 결과와 연결되어 청중에게 설득력 있게 제시되었는가?",
+  "슬라이드 가독성과 시각 자료 활용이 적절하며, 10분 내외의 발표 시간이 균형 있게 지켜졌는가?"
+];
+
+const CRIT_SHORT = ["상권 설명","분석 전달력","변수 해석","현장 연계","구성·시간"];
+const TEAMS = Array.from({length:12},(_,i)=>`${i+1}조`);
+const ADMIN_PW = "uos2026";
+const STORAGE_KEY = "eval_data_v1";
+
+let scores = new Array(5).fill(0);
+let selectedTeam = null;
+let currentEvaluator = "";
+let adminTab = "ranking";
+
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+// Build team grid
+function buildTeamGrid() {
+  const g = document.getElementById("teamGrid");
+  g.innerHTML = TEAMS.map((t,i) =>
+    `<button class="team-btn" onclick="selectTeam(${i})">${t}</button>`
+  ).join("");
+}
+
+function selectTeam(i) {
+  selectedTeam = i;
+  document.querySelectorAll(".team-btn").forEach((b,j) => b.classList.toggle("active", j===i));
+  renderCriteria();
+  checkSubmit();
+}
+
+function renderCriteria() {
+  const list = document.getElementById("criteriaList");
+  list.innerHTML = CRITERIA.map((text, i) => `
+    <div class="criterion">
+      <div class="crit-text"><span class="crit-num-badge">${i+1}</span>${text}</div>
+      <div class="star-row">
+        ${[1,2,3,4,5].map(v =>
+          `<button class="star-btn${scores[i]===v?' selected':''}" onclick="setScore(${i},${v})">${v}</button>`
+        ).join("")}
+        <span class="star-label">${scores[i]>0?scores[i]+'점':''}</span>
+      </div>
+    </div>
+  `).join("");
+  document.getElementById("totalScore").textContent = scores.reduce((a,b)=>a+b,0);
+}
+
+function setScore(crit, val) {
+  scores[crit] = val;
+  renderCriteria();
+  checkSubmit();
+}
+
+function checkSubmit() {
+  const name = document.getElementById("evaluatorName").value.trim();
+  const allScored = scores.every(s => s > 0);
+  document.getElementById("submitBtn").disabled = !(name && selectedTeam !== null && allScored);
+}
+
+document.getElementById("evaluatorName").addEventListener("input", checkSubmit);
+
+function submitEval() {
+  const name = document.getElementById("evaluatorName").value.trim();
+  const data = getData();
+  data.push({
+    ts: Date.now(),
+    evaluator: name,
+    team: selectedTeam,
+    scores: [...scores]
+  });
+  saveData(data);
+  document.getElementById("successMsg").textContent =
+    `${name}님, ${TEAMS[selectedTeam]} 평가가 저장되었습니다.`;
+  showPage("success");
+}
+
+function resetForNext() {
+  scores = new Array(5).fill(0);
+  selectedTeam = null;
+  document.querySelectorAll(".team-btn").forEach(b => b.classList.remove("active"));
+  renderCriteria();
+  checkSubmit();
+  showPage("student");
+}
+
+function showPage(p) {
+  document.getElementById("studentPage").style.display = "none";
+  document.getElementById("successPage").style.display = "none";
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("adminPage").style.display = "none";
+  if (p === "student") document.getElementById("studentPage").style.display = "block";
+  if (p === "success") document.getElementById("successPage").style.display = "block";
+  if (p === "login") document.getElementById("loginPage").style.display = "block";
+  if (p === "admin") { document.getElementById("adminPage").style.display = "block"; renderAdmin(); }
+}
+
+function adminLogin() {
+  const pw = document.getElementById("adminPw").value;
+  if (pw === ADMIN_PW) {
+    document.getElementById("loginError").style.display = "none";
+    document.getElementById("adminPw").value = "";
+    showPage("admin");
+  } else {
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+
+// ---- ADMIN ----
+function renderAdmin() {
+  const data = getData();
+  const total = data.length;
+  const evaluators = new Set(data.map(d=>d.evaluator)).size;
+
+  document.getElementById("adminMeta").textContent =
+    `총 ${total}건 응답 · 평가자 ${evaluators}명`;
+
+  // Stat grid
+  const teamAvgs = TEAMS.map((_,ti) => {
+    const rows = data.filter(d=>d.team===ti);
+    if (!rows.length) return null;
+    const sum = rows.reduce((s,d)=>s+d.scores.reduce((a,b)=>a+b,0),0);
+    return sum/rows.length;
+  });
+  const validAvgs = teamAvgs.filter(v=>v!==null);
+  const overallAvg = validAvgs.length ? (validAvgs.reduce((a,b)=>a+b,0)/validAvgs.length).toFixed(2) : "-";
+  const maxTeam = validAvgs.length ? TEAMS[teamAvgs.indexOf(Math.max(...validAvgs))] : "-";
+  const minTeam = validAvgs.length ? TEAMS[teamAvgs.indexOf(Math.min(...validAvgs))] : "-";
+
+  document.getElementById("statGrid").innerHTML = `
+    <div class="stat-card"><div class="s-label">총 응답 수</div><div class="s-val">${total}</div></div>
+    <div class="stat-card"><div class="s-label">평가자 수</div><div class="s-val">${evaluators}</div></div>
+    <div class="stat-card"><div class="s-label">전체 평균</div><div class="s-val">${overallAvg}</div></div>
+    <div class="stat-card"><div class="s-label">최고 점수 조</div><div class="s-val">${maxTeam}</div></div>
+    <div class="stat-card"><div class="s-label">최저 점수 조</div><div class="s-val">${minTeam}</div></div>
+  `;
+
+  renderTabRanking(data, teamAvgs);
+  renderTabBreakdown(data);
+  renderTabResponses(data);
+}
+
+function renderTabRanking(data, teamAvgs) {
+  const rows = TEAMS.map((t,i) => {
+    const r = data.filter(d=>d.team===i);
+    if (!r.length) return { team:t, n:0, avg:null, critAvgs:new Array(5).fill(null) };
+    const critAvgs = CRITERIA.map((_,ci) => {
+      const s = r.reduce((a,d)=>a+d.scores[ci],0)/r.length;
+      return s.toFixed(2);
+    });
+    const totalAvg = r.reduce((s,d)=>s+d.scores.reduce((a,b)=>a+b,0),0)/r.length;
+    return { team:t, n:r.length, avg:totalAvg, critAvgs };
+  }).filter(r=>r.avg!==null).sort((a,b)=>b.avg-a.avg);
+
+  const noData = TEAMS.filter((_,i)=>!data.find(d=>d.team===i));
+
+  document.getElementById("tab-ranking").innerHTML = `
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>순위</th><th>조</th><th>응답수</th>
+            ${CRIT_SHORT.map(c=>`<th>${c}</th>`).join("")}
+            <th>총점 평균</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r,idx)=>`
+            <tr class="${idx===0?'rank-1':''}">
+              <td>${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':idx+1}</td>
+              <td><strong>${r.team}</strong></td>
+              <td>${r.n}</td>
+              ${r.critAvgs.map(v=>`<td>${v}</td>`).join("")}
+              <td class="score-cell" style="color:var(--accent)">${r.avg.toFixed(2)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+      ${noData.length ? `<div style="font-size:12px;color:var(--text-muted);margin-top:10px">미응답: ${noData.join(", ")}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderTabBreakdown(data) {
+  const html = CRITERIA.map((text, ci) => {
+    const vals = data.map(d=>d.scores[ci]);
+    const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+    const pct = (avg/5)*100;
+    return `
+      <div class="crit-row">
+        <div class="crit-row-label"><span class="crit-num-badge">${ci+1}</span>${text.substring(0,28)}…</div>
+        <div class="crit-bar-wrap"><div class="crit-bar" style="width:${pct.toFixed(1)}%"></div></div>
+        <div class="crit-avg">${avg.toFixed(2)}</div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("tab-breakdown").innerHTML = `
+    <div class="card">
+      <div class="section-label" style="margin-bottom:16px">평가 항목별 전체 평균 (5점 만점)</div>
+      ${html}
+    </div>
+  `;
+}
+
+function renderTabResponses(data) {
+  if (!data.length) {
+    document.getElementById("tab-responses").innerHTML = `<div class="card" style="color:var(--text-muted);font-size:14px">응답 데이터가 없습니다.</div>`;
+    return;
+  }
+  const sorted = [...data].sort((a,b)=>b.ts-a.ts);
+  document.getElementById("tab-responses").innerHTML = `
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>시각</th><th>평가자</th><th>대상조</th>
+            ${CRIT_SHORT.map(c=>`<th>${c}</th>`).join("")}
+            <th>합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(r=>`
+            <tr>
+              <td style="font-size:11px;color:var(--text-muted)">${new Date(r.ts).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</td>
+              <td>${r.evaluator}</td>
+              <td>${TEAMS[r.team]}</td>
+              ${r.scores.map(s=>`<td>${s}</td>`).join("")}
+              <td class="score-cell">${r.scores.reduce((a,b)=>a+b,0)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function switchTab(tab, btn) {
+  adminTab = tab;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  ["ranking","breakdown","responses"].forEach(t=>{
+    document.getElementById("tab-"+t).style.display = t===tab?"block":"none";
+  });
+}
+
+function exportCSV() {
+  const data = getData();
+  if (!data.length) { showToast("데이터가 없습니다"); return; }
+  const header = ["시각","평가자","대상조",...CRIT_SHORT,"합계"].join(",");
+  const rows = data.map(r=>
+    [new Date(r.ts).toLocaleString('ko-KR'),r.evaluator,TEAMS[r.team],...r.scores,r.scores.reduce((a,b)=>a+b,0)].join(",")
+  );
+  const csv = "\uFEFF" + [header,...rows].join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download = "동료평가결과_도시환경빅데이터분석.csv";
+  a.click();
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+// Init
+buildTeamGrid();
+renderCriteria();
+</script>
+</body>
+</html>
